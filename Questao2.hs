@@ -2,21 +2,24 @@ module Questao2 where
 
 import Pilha
 
-verificarParenteses :: String -> PilhaData Char -> IO Bool
-verificarParenteses   []  pilha = if isEmpty pilha then return True else return False
-verificarParenteses (caractere:restante) pilha
-    | caractere == '(' = verificarParenteses restante (push 'X' pilha)
-    | caractere == ')' = verificarParenteses restante (pop pilha)
-    | otherwise = verificarParenteses restante pilha
+verificarParentesesAux :: String -> PilhaData Char -> Bool
+verificarParentesesAux   []  pilha = isEmpty pilha
+verificarParentesesAux (caractere:restante) pilha
+    | caractere == '(' = verificarParentesesAux restante (push 'X' pilha)
+    | caractere == ')' = verificarParentesesAux restante (pop pilha)
+    | otherwise = verificarParentesesAux restante pilha
 
-main :: IO()
-main = 
-    do
-        putStrLn "Digite uma sequencia:"
-        sequenciaDeCaracteres <- getLine
-        parentesesValidos <- verificarParenteses sequenciaDeCaracteres pilhaVazia
-        if parentesesValidos then
-            putStrLn "Tudo correto!"
-        else
-            putStrLn "Deu errado pai kkk"
+verificarParenteses :: String -> Bool
+verificarParenteses entrada = verificarParentesesAux entrada pilhaVazia
+
+-- main :: IO()
+-- main = 
+--     do
+--         putStrLn "Digite uma sequencia:"
+--         sequenciaDeCaracteres <- getLine
+--         parentesesValidos <- verificarParenteses sequenciaDeCaracteres
+--         if parentesesValidos then
+--             putStrLn "Tudo correto!"
+--         else
+--             putStrLn "Deu errado pai kkk"
         
