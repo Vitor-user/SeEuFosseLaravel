@@ -1,4 +1,4 @@
-module DicionarioMain () where
+module DicionarioMain (imprimir) where
 
 import ABB
 import Dicionario
