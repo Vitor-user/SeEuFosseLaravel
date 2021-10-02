@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
-module Formula where
+module Formula (Formula, Coluna, Tabela, Linhas, montarTabelaInicial, montarTabelaFinal, verificaTautologia, pegarFormula, pegarLinha, formula) where
 
 import FilaSR
 
-data Formula = Var String | Not Formula | And Formula Formula | Or Formula Formula deriving (Eq)
+data Formula = Var String | Not Formula | And Formula Formula | Or Formula Formula deriving (Eq, Read)
 
 instance Show Formula where
   show(Var a) = a 
@@ -11,9 +11,9 @@ instance Show Formula where
   show(And esquerda direita) = "(" ++ show esquerda ++ " e " ++ show direita ++ ")"
   show(Or esquerda direita) = "(" ++ show esquerda ++ " ou " ++ show direita ++ ")"
 
-type Linhas = [Bool]
 data Coluna = Col Formula Linhas deriving Show
 
+type Linhas = [Bool]
 type Tabela = [Coluna]
 
 formula :: Formula
@@ -31,12 +31,6 @@ enfileiraVariaveis (And (Var a) direita) fila = enfileiraVariaveis direita (add 
 enfileiraVariaveis (And esquerda (Var a)) fila = enfileiraVariaveis esquerda (add fila a)
 -}
 
--- conta a quantidade de linhas que serao necessarias para montar a tabela
-quantidadeLinhas :: FilaSR String -> Int
-quantidadeLinhas fila
-  | fila == filaSRVazia = 1
-  | otherwise = 2 * quantidadeLinhas (removerPrimeiro fila)
-
 montarTabelaInicial :: Formula -> Tabela
 montarTabelaInicial formula = montarTabelaInicialAuxiliar fila numeroLinhas numeroLinhas
   where
@@ -51,39 +45,6 @@ montarTabelaInicialAuxiliar fila numeroLinhas intervalo
     novoIntervalo = div intervalo 2 -- calcula o valor do novo intervalo (sequencia de True ou False)
     linhas = gerarLinhas numeroLinhas novoIntervalo novoIntervalo True -- gera as linhas de uma coluna
     novaColuna = [Col (Var (pegarPrimeiro fila)) linhas]
-
--- usa a funcao gerarNLinhas para gerar todas as linhas de uma coluna da tabela
--- de acordo com um intervalo
-gerarLinhas :: Int -> Int -> Int -> Bool -> Linhas
-gerarLinhas quantidade intervalo incremento booleano
-  | quantidade == intervalo = linhas
-  | otherwise = linhas ++ gerarLinhas quantidade (intervalo + incremento) incremento (not booleano)
-    where
-      linhas = gerarNLinhas incremento booleano
-
--- gera n quantidade de linhas na tabela
-gerarNLinhas :: Int -> Bool -> Linhas
-gerarNLinhas 0 valor = []
-gerarNLinhas quantidade valor = valor : gerarNLinhas (quantidade - 1) valor
-
-pegarLinha :: Coluna -> Linhas
-pegarLinha (Col formula linhas) = linhas
-
-calculaLinha :: Coluna -> Coluna -> (Bool -> Bool -> Bool) -> Linhas
-calculaLinha (Col formula1 []) (Col formula2 []) operador = []
-calculaLinha (Col formula1 (elemento1:linhas1)) (Col formula2 (elemento2:linhas2)) operador =
-  valor : resto -- inclui valor na lista gerada pela funcao resto
-  where
-    valor = operador elemento1 elemento2 -- Bool
-    resto = calculaLinha (Col formula1 linhas1) (Col formula1 linhas2) operador -- Funcao que retorna tipo Linhas
-
-buscaColVar :: Tabela -> Formula -> Coluna
-buscaColVar [] (Var valor) = error "A variavel  variavel"
-buscaColVar (Col (Var a) valores :tabela) (Var valor)
-  | valor == a = Col (Var a) valores
-  | otherwise = buscaColVar tabela (Var valor)
-buscaColVar (coluna:tabela) (Var valor) = buscaColVar tabela (Var valor)
-buscaColVar _ _ = error "A formula nao eh uma variavel"
 
 montarTabelaFinal :: Tabela -> Formula -> Tabela
 montarTabelaFinal tabela formula = tabela ++ montarTabelaFinalAuxiliar tabela formula
@@ -112,11 +73,66 @@ montarTabelaFinalAuxiliar tabela (Not formula) =
     tabelaNova = montarTabelaFinalAuxiliar tabela formula -- Tabela
     coluna = head tabelaNova -- Coluna
     linha = pegarLinha coluna
+
+verificaTautologia :: Tabela -> Bool
+verificaTautologia tabela = verificaTautologiaAuxiliar linhas
+  where
+    ultimaColuna = tabela !! (length tabela - 1) -- retorna a ultima coluna
+    linhas = pegarLinha ultimaColuna
+
+verificaTautologiaAuxiliar :: Linhas -> Bool
+verificaTautologiaAuxiliar [] = True
+verificaTautologiaAuxiliar (a:b)
+  | a = verificaTautologiaAuxiliar b
+  | otherwise = False
+
+----------------------- FUNCOES UTILITARIAS ------------------------
+
+calculaLinha :: Coluna -> Coluna -> (Bool -> Bool -> Bool) -> Linhas
+calculaLinha (Col formula1 []) (Col formula2 []) operador = []
+calculaLinha (Col formula1 (elemento1:linhas1)) (Col formula2 (elemento2:linhas2)) operador =
+  valor : resto -- inclui valor na lista gerada pela funcao resto
+  where
+    valor = operador elemento1 elemento2 -- Bool
+    resto = calculaLinha (Col formula1 linhas1) (Col formula1 linhas2) operador -- Funcao que retorna tipo Linhas
+
+-- gera n quantidade de linhas na tabela
+gerarNLinhas :: Int -> Bool -> Linhas
+gerarNLinhas 0 valor = []
+gerarNLinhas quantidade valor = valor : gerarNLinhas (quantidade - 1) valor
+
+buscaColVar :: Tabela -> Formula -> Coluna
+buscaColVar [] (Var valor) = error "A variavel  variavel"
+buscaColVar (Col (Var a) valores :tabela) (Var valor)
+  | valor == a = Col (Var a) valores
+  | otherwise = buscaColVar tabela (Var valor)
+buscaColVar (coluna:tabela) (Var valor) = buscaColVar tabela (Var valor)
+buscaColVar _ _ = error "A formula nao eh uma variavel"
+
+-- usa a funcao gerarNLinhas para gerar todas as linhas de uma coluna da tabela
+-- de acordo com um intervalo
+gerarLinhas :: Int -> Int -> Int -> Bool -> Linhas
+gerarLinhas quantidade intervalo incremento booleano
+  | quantidade == intervalo = linhas
+  | otherwise = linhas ++ gerarLinhas quantidade (intervalo + incremento) incremento (not booleano)
+    where
+      linhas = gerarNLinhas incremento booleano
+
+-- conta a quantidade de linhas que serao necessarias para montar a tabela
+quantidadeLinhas :: FilaSR String -> Int
+quantidadeLinhas fila
+  | fila == filaSRVazia = 1
+  | otherwise = 2 * quantidadeLinhas (removerPrimeiro fila)
   
 imprimirTabela :: Tabela -> String
 imprimirTabela [e] = show e ++ "\n"
 imprimirTabela (a:b) = show a ++ "\n" ++ imprimirTabela b
 
+pegarLinha :: Coluna -> Linhas
+pegarLinha (Col formula linhas) = linhas
+
+pegarFormula :: Coluna -> Formula
+pegarFormula (Col formula linhas) = formula
 
 {-
 calculaColuna :: Coluna -> Coluna -> Formula -> (Bool -> Bool -> Bool) -> Coluna
