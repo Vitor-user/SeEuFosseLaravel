@@ -3,7 +3,13 @@ module Formula where
 
 import FilaSR
 
-data Formula = Var String | Not Formula | And Formula Formula | Or Formula Formula deriving (Show, Eq)
+data Formula = Var String | Not Formula | And Formula Formula | Or Formula Formula deriving (Eq)
+
+instance Show Formula where
+  show(Var a) = a 
+  show(Not formula) = "~(" ++ show formula ++ ")"
+  show(And esquerda direita) = "(" ++ show esquerda ++ " e " ++ show direita ++ ")"
+  show(Or esquerda direita) = "(" ++ show esquerda ++ " ou " ++ show direita ++ ")"
 
 type Linhas = [Bool]
 data Coluna = Col Formula Linhas deriving Show
