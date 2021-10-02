@@ -16,8 +16,7 @@ ehOperador '/' = True
 ehOperador  _  = False
 
 ehDigito :: Char -> Bool
-ehDigito simbolo = (simbolo >= '0' && simbolo <= '9') || simbolo == '.'
-
+ehDigito simbolo = isDigit simbolo || simbolo == '.'
 
 
 avaliarAux :: String -> PilhaData Double -> String -> IO Double

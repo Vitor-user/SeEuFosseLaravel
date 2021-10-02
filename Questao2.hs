@@ -6,7 +6,8 @@ verificarParentesesAux :: String -> PilhaData Char -> Bool
 verificarParentesesAux   []  pilha = isEmpty pilha
 verificarParentesesAux (caractere:restante) pilha
     | caractere == '(' = verificarParentesesAux restante (push 'X' pilha)
-    | caractere == ')' = verificarParentesesAux restante (pop pilha)
+    | caractere == ')' && (isEmpty pilha) = False
+    | caractere == ')' && (not (isEmpty pilha)) = verificarParentesesAux restante (pop pilha)
     | otherwise = verificarParentesesAux restante pilha
 
 verificarParenteses :: String -> Bool
