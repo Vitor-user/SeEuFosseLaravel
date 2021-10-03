@@ -1,7 +1,7 @@
 module Questao1 where
 
 import Pilha
--- teste
+-- testea
 operar :: Double -> Double -> Char -> Double
 operar operando1 operando2 '+' = operando1 + operando2
 operar operando1 operando2 '-' = operando1 - operando2
