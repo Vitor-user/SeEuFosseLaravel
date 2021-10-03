@@ -6,10 +6,6 @@ import Dicionario
 teste :: String
 teste = "redes aula redes aula haskell aula"
 
-main :: IO()
-main = do
-          putStr (imprimir teste)
-
 imprimir :: String -> String
 imprimir texto = imprimirAuxiliar (words texto) emptyTree
 

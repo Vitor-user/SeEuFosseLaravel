@@ -2,11 +2,6 @@ module Main where
 
 import Formula
 
--- entrar com uma formula
--- instrucoes
--- pegar uma formula do historico
--- sair
-
 main :: IO()
 main = mainAuxiliar []
 
@@ -14,7 +9,7 @@ mainAuxiliar :: [Formula] -> IO()
 mainAuxiliar formulas =
   do
     putStr (">1 Entrar com uma formula e montar tabela\n" ++
-            ">2 Montar tabela de uma formula do historico (historico eh apagado ao fim de cada execucao)\n" ++
+            ">2 Montar tabela de uma formula do historico (historico eh apagado ao fim da execucao)\n" ++
             ">3 Sair\n" ++
             ">")
     opcao <- getLine

@@ -83,7 +83,7 @@ verificaTautologia tabela = verificaTautologiaAuxiliar linhas
 verificaTautologiaAuxiliar :: Linhas -> Bool
 verificaTautologiaAuxiliar [] = True
 verificaTautologiaAuxiliar (a:b)
-  | a = verificaTautologiaAuxiliar b
+  | a = verificaTautologiaAuxiliar b -- a = Bool
   | otherwise = False
 
 ----------------------- FUNCOES UTILITARIAS ------------------------
@@ -96,14 +96,9 @@ calculaLinha (Col formula1 (elemento1:linhas1)) (Col formula2 (elemento2:linhas2
     valor = operador elemento1 elemento2 -- Bool
     resto = calculaLinha (Col formula1 linhas1) (Col formula1 linhas2) operador -- Funcao que retorna tipo Linhas
 
--- gera n quantidade de linhas na tabela
-gerarNLinhas :: Int -> Bool -> Linhas
-gerarNLinhas 0 valor = []
-gerarNLinhas quantidade valor = valor : gerarNLinhas (quantidade - 1) valor
-
 buscaColVar :: Tabela -> Formula -> Coluna
-buscaColVar [] (Var valor) = error "A variavel  variavel"
-buscaColVar (Col (Var a) valores :tabela) (Var valor)
+buscaColVar [] (Var valor) = error "A variavel nao esta na tabela"
+buscaColVar (Col (Var a) valores:tabela) (Var valor)
   | valor == a = Col (Var a) valores
   | otherwise = buscaColVar tabela (Var valor)
 buscaColVar (coluna:tabela) (Var valor) = buscaColVar tabela (Var valor)
@@ -117,6 +112,11 @@ gerarLinhas quantidade intervalo incremento booleano
   | otherwise = linhas ++ gerarLinhas quantidade (intervalo + incremento) incremento (not booleano)
     where
       linhas = gerarNLinhas incremento booleano
+
+-- gera n quantidade de linhas na tabela
+gerarNLinhas :: Int -> Bool -> Linhas
+gerarNLinhas 0 valor = []
+gerarNLinhas quantidade valor = valor : gerarNLinhas (quantidade - 1) valor
 
 -- conta a quantidade de linhas que serao necessarias para montar a tabela
 quantidadeLinhas :: FilaSR String -> Int
